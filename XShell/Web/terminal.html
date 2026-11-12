@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>XShell Terminal</title>
+<link rel="stylesheet" href="vendor/xterm.css">
+<style>
+  html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: #0c0c0c;
+    --menu-bg: #171e2b;
+    --menu-border: #334052;
+    --menu-text: #e3e9f2;
+    --menu-muted: #93a0b3;
+    --menu-hover-bg: #253248;
+    --menu-hover-text: #ffffff;
+    --menu-sep: #2b3646;
+    --menu-shadow: rgba(0, 0, 0, .55);
+    --search-bg: #171e2b;
+    --search-border: #334052;
+    --search-text: #e3e9f2;
+    --search-input-bg: #10161f;
+    --search-button-bg: #1f2937;
+    --search-focus: #3b78d8;
+  }
+  body.light {
+    --menu-bg: #f7f9fc;
+    --menu-border: #b9c6d6;
+    --menu-text: #1f2d3d;
+    --menu-muted: #8a97a6;
+    --menu-hover-bg: #dcebfa;
+    --menu-hover-text: #0b4f8a;
+    --menu-sep: #dce3eb;
+    --menu-shadow: rgba(0, 0, 0, .30);
+    --search-bg: #f7f9fc;
+    --search-border: #b9c6d6;
+    --search-text: #1f2d3d;
+    --search-input-bg: #ffffff;
+    --search-button-bg: #ffffff;
+    --search-focus: #2b7cd3;
+  }
+  #terminal {
+    position: absolute;
+    inset: 0;
+    padding: 6px 7px 5px 8px;
+    box-sizing: border-box;
+  }
+  .xterm .xterm-viewport {
+    scrollbar-width: thin;
+    scrollbar-color: #3d4a5c #111820;
+  }
+  .xterm .xterm-viewport::-webkit-scrollbar {
+    width: 11px;
+  }
+  .xterm .xterm-viewport::-webkit-scrollbar-track {
+    background: #111820;
+  }
+  .xterm .xterm-viewport::-webkit-scrollbar-thumb {
+    background: #3d4a5c;
+    border-radius: 6px;
+    border: 2px solid #111820;
+  }
+  .xterm .xterm-viewport::-webkit-scrollbar-thumb:hover {
+    background: #52647c;
+  }
+  #ctx {
+    position: fixed;
+    z-index: 2000;
+    min-width: 184px;
+    background: var(--menu-bg);
+    border: 1px solid var(--menu-border);
+    border-radius: 4px;
+    box-shadow: 0 8px 24px var(--menu-shadow);
+    padding: 4px;
+    display: none;
+    font: 13px "Microsoft YaHei UI", "Segoe UI", sans-serif;
+    color: var(--menu-text);
+    user-select: none;
+  }
+  #ctx .item {
+    height: 29px;
+    line-height: 29px;
+    padding: 0 16px 0 12px;
+    border-radius: 3px;
+    white-space: nowrap;
+    cursor: default;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  #ctx .item:hover {
+    background: var(--menu-hover-bg);
+    color: var(--menu-hover-text);
+  }
+  #ctx .item.disabled {
+    color: var(--menu-muted);
+    background: transparent;
+  }
+  #ctx .shortcut {
+    margin-left: auto;
+    color: var(--menu-muted);
+    font-size: 11px;
+  }
+  #ctx .sep {
+    height: 1px;
+    background: var(--menu-sep);
+    margin: 4px 8px;
+  }
+  #ctx .arrow {
+    margin-left: auto;
+    color: var(--menu-muted);
+    font-size: 15px;
+    padding-left: 12px;
+  }
+  #ctx .has-sub {
+    position: relative;
+  }
+  #ctx .submenu {
+    display: none;
+    position: absolute;
+    left: calc(100% - 4px);
+    top: -5px;
+    min-width: 186px;
+    background: var(--menu-bg);
+    border: 1px solid var(--menu-border);
+    border-radius: 4px;
+    box-shadow: 0 8px 24px var(--menu-shadow);
+    padding: 4px;
+  }
+  #ctx .submenu.flip {
+    left: auto;
+    right: calc(100% - 4px);
+  }
+  #ctx .has-sub:hover > .submenu {
+    display: block;
+  }
+  #search {
+    position: fixed;
+    top: 7px;
+    right: 19px;
+    z-index: 1500;
+    display: none;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 6px;
+    background: var(--search-bg);
+    border: 1px solid var(--search-border);
+    border-radius: 4px;
+    box-shadow: 0 4px 14px var(--menu-shadow);
+    font: 12px "Microsoft YaHei UI", "Segoe UI", sans-serif;
+    color: var(--search-text);
+  }
+  #search input {
+    width: 190px;
+    height: 23px;
+    border: 1px solid var(--search-border);
+    border-radius: 3px;
+    padding: 0 6px;
+    outline: none;
+    font: 12px Consolas, "Microsoft YaHei UI", monospace;
+    color: var(--search-text);
+    background: var(--search-input-bg);
+  }
+  #search input:focus {
+    border-color: var(--search-focus);
+    box-shadow: 0 0 0 2px rgba(43, 124, 211, .16);
+  }
+  #search button {
+    height: 25px;
+    border: 1px solid var(--search-border);
+    border-radius: 3px;
+    background: var(--search-button-bg);
+    color: var(--search-text);
+    cursor: pointer;
+    font: 12px "Microsoft YaHei UI", sans-serif;
+  }
+  #search button:hover {
+    background: var(--menu-hover-bg);
+    border-color: var(--search-focus);
+  }
+  #search .count {
+    color: var(--menu-muted);
+    min-width: 34px;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+<div id="terminal"></div>
+<div id="ctx">
+  <div class="item" data-action="copy">复制<span class="shortcut">右键</span></div>
+  <div class="item" data-action="paste">粘贴<span class="shortcut">右键</span></div>
+  <div class="sep"></div>
+  <div class="item" data-action="selectall">全选</div>
+  <div class="item" data-action="search">查找</div>
+  <div class="sep"></div>
+  <div class="item has-sub">
+    日志<span class="arrow">›</span>
+    <div class="submenu" id="logSubmenu">
+      <div class="item" data-action="log-start">启动日志</div>
+      <div class="item" data-action="log-stop">停止日志</div>
+      <div class="sep"></div>
+      <div class="item" data-action="log-open">打开日志文件夹</div>
+    </div>
+  </div>
+  <div class="sep"></div>
+  <div class="item" data-action="clear">清屏</div>
+</div>
+<div id="search">
+  <input id="searchInput" type="text" placeholder="查找终端内容" spellcheck="false">
+  <span class="count" id="searchCount"></span>
+  <button id="searchPrev" title="上一个">↑</button>
+  <button id="searchNext" title="下一个">↓</button>
+  <button id="searchClose" title="关闭">×</button>
+</div>
+<script src="vendor/xterm.js"></script>
+<script src="vendor/addon-fit.js"></script>
+<script src="vendor/addon-unicode11.js"></script>
+<script src="vendor/addon-search.js"></script>
+<script src="vendor/addon-web-links.js"></script>
+<script src="terminal.js"></script>
+</body>
+</html>

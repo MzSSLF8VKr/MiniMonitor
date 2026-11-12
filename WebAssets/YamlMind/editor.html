@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0a0c11">
+<title>YAML 编辑器 · YAML Mind</title>
+<script>
+  (function () {
+    try {
+      var t = localStorage.getItem('ym:theme') || 'dark';
+      var s = t === 'auto' ? (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark') : t;
+      document.documentElement.setAttribute('data-theme', s);
+      document.querySelector('meta[name="theme-color"]').setAttribute('content', s === 'dark' ? '#0a0c11' : '#f4f2ed');
+    } catch (e) {}
+  })();
+</script>
+<link rel="stylesheet" href="/static/fonts/fonts.css">
+<link rel="stylesheet" href="/static/vendor/lib/codemirror.css">
+<link rel="stylesheet" href="/static/vendor/addon/dialog/dialog.css">
+<link rel="stylesheet" href="/static/vendor/addon/fold/foldgutter.css">
+<link rel="stylesheet" href="/static/css/tokens.css">
+<link rel="stylesheet" href="/static/css/ui.css">
+<link rel="stylesheet" href="/static/css/code.css">
+<link rel="stylesheet" href="/static/css/editor.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='6' fill='%23f2a93b'/%3E%3Cg fill='none' stroke='%2312100a' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='12' cy='12' r='2.4'/%3E%3Ccircle cx='5' cy='6.5' r='1.8'/%3E%3Ccircle cx='19' cy='6.5' r='1.8'/%3E%3Ccircle cx='5' cy='17.5' r='1.8'/%3E%3Ccircle cx='19' cy='17.5' r='1.8'/%3E%3Cpath d='M6.6 7.6 9.9 10.5M17.4 7.6 14.1 10.5M6.6 16.4 9.9 13.5M17.4 16.4 14.1 13.5'/%3E%3C/g%3E%3C/svg%3E">
+</head>
+<body class="editor-page">
+
+<!-- ── toolbar ─────────────────────────────────────────────────────────── -->
+<header class="etop">
+  <a class="etop__home" href="/" title="返回导图管理">
+    <span class="brand__mark">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="2.5"/><circle cx="4.6" cy="6.2" r="1.9"/><circle cx="19.4" cy="6.2" r="1.9"/>
+        <circle cx="4.6" cy="17.8" r="1.9"/><circle cx="19.4" cy="17.8" r="1.9"/>
+        <path d="M6.4 7.3 9.8 10.4M17.6 7.3 14.2 10.4M6.4 16.7 9.8 13.6M17.6 16.7 14.2 13.6"/>
+      </svg>
+    </span>
+  </a>
+
+  <div class="etop__title">
+    <input id="docTitle" class="etitle" value="" spellcheck="false" autocomplete="off" aria-label="导图名称">
+    <div class="etop__meta">
+      <span id="saveState" class="sstate sstate--idle"><i class="dot"></i><span>连接中…</span></span>
+      <span class="etop__sep"></span>
+      <span id="revChip" class="tiny muted mono">v0</span>
+      <span class="etop__sep"></span>
+      <span id="docStat" class="tiny muted">—</span>
+    </div>
+  </div>
+
+  <div class="etop__acts">
+    <div class="seg" id="viewOpts" title="编辑器选项">
+      <button class="seg__btn" id="optGuides" title="对齐虚线（缩进参考线）"><span data-ico="wrap"></span>对齐虚线</button>
+      <button class="seg__btn" id="optWrap" title="自动换行"><span data-ico="list"></span>换行</button>
+    </div>
+    <button class="btn btn--ghost" id="btnFormat" title="重新缩进：展开 Tab、规范层级缩进"><span data-ico="layers"></span>整理缩进</button>
+    <button class="btn" id="btnSave" title="保存 (Ctrl+S)"><span data-ico="save"></span>保存<kbd>S</kbd></button>
+    <button class="btn btn--primary" id="btnMap" title="在新标签页展示思维导图"><span data-ico="map"></span>展示思维导图</button>
+    <div class="seg" id="themeSeg" title="主题"></div>
+  </div>
+</header>
+
+<!-- ── conflict banner ─────────────────────────────────────────────────── -->
+<div class="banner" id="conflict" hidden></div>
+
+<!-- ── workspace ───────────────────────────────────────────────────────── -->
+<main class="ework">
+  <section class="epad">
+    <div class="ecode" id="code">
+      <textarea id="src" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off"></textarea>
+      <div class="eloading" id="loading">
+        <div class="eloading__spin"></div>
+        <span>正在载入 YAML…</span>
+      </div>
+    </div>
+    <footer class="ebar" id="status">
+      <span class="eb__grp"><span class="eb__k">行</span><b id="stLine">1</b><span class="eb__k">列</span><b id="stCol">1</b></span>
+      <span class="eb__sep"></span>
+      <span class="eb__grp"><span class="eb__k">缩进</span><b id="stIndent">0</b></span>
+      <span class="eb__sep"></span>
+      <span class="eb__grp" id="stSelWrap" hidden><span class="eb__k">选中</span><b id="stSel">0</b></span>
+      <span class="eb__spacer"></span>
+      <span class="eb__grp" id="stYaml"><span data-ico="check"></span><b>解析中…</b></span>
+      <span class="eb__sep"></span>
+      <span class="eb__grp"><span class="eb__k">节点</span><b id="stNodes">0</b><span class="eb__k">深度</span><b id="stDepth">0</b></span>
+      <span class="eb__sep"></span>
+      <span class="eb__grp"><b id="stChars">0</b><span class="eb__k">字符</span><b id="stBytes">0 B</b></span>
+      <span class="eb__sep"></span>
+      <span class="eb__grp" id="stSaved"><span data-ico="clock"></span><b>—</b></span>
+      <span class="eb__sep"></span>
+      <span class="eb__zoom">
+        <button id="fsMinus" title="缩小字号 (Ctrl+-)">A−</button>
+        <b id="fsVal">14</b>
+        <button id="fsPlus" title="放大字号 (Ctrl++)">A+</button>
+      </span>
+    </footer>
+  </section>
+
+  <aside class="easide" id="aside">
+    <div class="easide__head">
+      <div class="seg seg--tabs" id="asideTabs">
+        <button class="seg__btn is-on" data-tab="outline"><span data-ico="tree"></span>大纲</button>
+        <button class="seg__btn" data-tab="history"><span data-ico="history"></span>历史</button>
+      </div>
+      <button class="icon-btn" id="btnAside" title="收起侧栏"><span data-ico="chevron"></span></button>
+    </div>
+    <div class="easide__body" id="outline"></div>
+    <div class="easide__body hide" id="history"></div>
+    <div class="easide__foot tiny muted" id="asideFoot">点击大纲条目可跳转到对应行</div>
+  </aside>
+  <button class="easide__open" id="asideOpen" title="展开侧栏"><span data-ico="chevron"></span></button>
+</main>
+
+<!-- templates -->
+<template id="tplLineError">
+  <div class="lineerr">
+    <span class="lineerr__ico"></span>
+    <div class="lineerr__body">
+      <div class="lineerr__title">YAML 语法错误</div>
+      <div class="lineerr__msg"></div>
+      <div class="lineerr__pos"></div>
+    </div>
+    <button class="btn btn--sm btn--ghost lineerr__fix">跳到该行</button>
+    <button class="icon-btn lineerr__close"></button>
+  </div>
+</template>
+
+<script src="/static/vendor/lib/codemirror.js"></script>
+<script src="/static/vendor/mode/yaml/yaml.js"></script>
+<script src="/static/vendor/addon/selection/active-line.js"></script>
+<script src="/static/vendor/addon/edit/closebrackets.js"></script>
+<script src="/static/vendor/addon/edit/matchbrackets.js"></script>
+<script src="/static/vendor/addon/dialog/dialog.js"></script>
+<script src="/static/vendor/addon/search/searchcursor.js"></script>
+<script src="/static/vendor/addon/search/search.js"></script>
+<script src="/static/vendor/addon/fold/foldcode.js"></script>
+<script src="/static/vendor/addon/fold/foldgutter.js"></script>
+<script src="/static/vendor/addon/fold/indent-fold.js"></script>
+<script src="/static/js/common.js"></script>
+<script src="/static/js/editor.js"></script>
+</body>
+</html>

@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark" data-theme-mode="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark light">
+<meta name="description" content="自托管滴答清单：项目与任务管理。">
+<title>Todo Push · 滴答清单</title>
+<script>
+/* 阻塞式首屏主题：先读 localStorage，避免样式渲染后闪烁。键名与 assets/theme.js 保持一致。 */
+(function () {
+  var KEY = 'todo.theme';
+  var mode = 'dark';
+  try {
+    var saved = window.localStorage.getItem(KEY);
+    if (saved === 'dark' || saved === 'light' || saved === 'system') mode = saved;
+  } catch (e) { /* 隐私模式下 localStorage 不可用，退回默认 dark */ }
+  var resolved = mode;
+  if (mode === 'system') {
+    resolved = (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light';
+  }
+  var el = document.documentElement;
+  el.setAttribute('data-theme', resolved);
+  el.setAttribute('data-theme-mode', mode);
+})();
+</script>
+<link rel="stylesheet" href="assets/app.css">
+</head>
+<body>
+<a class="skip-link" href="#view">跳到主内容</a>
+
+<div class="app" id="app">
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path d="M5 13l4 4 10-10" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </span>
+      <span class="brand-name">Todo Push</span>
+    </div>
+
+    <nav class="topnav" id="topnav" aria-label="主导航">
+      <a class="topnav-item" href="#/tasks" data-route="tasks">
+        <svg viewBox="0 0 24 24" class="ico" aria-hidden="true"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1.2"/><path d="M8.5 12.5l1.8 1.8 4-4"/></svg>
+        <span>任务</span>
+        <span class="tab-badge" data-badge="openTasks"></span>
+      </a>
+      <a class="topnav-item" href="#/data" data-route="data">
+        <svg viewBox="0 0 24 24" class="ico" aria-hidden="true"><ellipse cx="12" cy="6" rx="7.5" ry="3"/><path d="M4.5 6v6c0 1.7 3.4 3 7.5 3s7.5-1.3 7.5-3V6"/><path d="M4.5 12v6c0 1.7 3.4 3 7.5 3s7.5-1.3 7.5-3v-6"/></svg>
+        <span>数据</span>
+      </a>
+      <a class="topnav-item" href="#/settings" data-route="settings">
+        <svg viewBox="0 0 24 24" class="ico" aria-hidden="true"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2.1"/><circle cx="7" cy="17" r="2.1"/></svg>
+        <span>设置</span>
+      </a>
+    </nav>
+
+    <div class="topbar-spacer"></div>
+
+    <div class="clock" id="clock" title="时间来源：NTP 校时">
+      <span class="clock-src" id="clockSrc">NTP</span>
+      <span class="clock-date">--</span>
+      <span class="clock-time">--:--:--</span>
+    </div>
+
+    <button class="icon-btn" id="themeToggle" type="button" aria-label="切换主题">
+      <svg viewBox="0 0 24 24" class="ico theme-ico" aria-hidden="true"></svg>
+    </button>
+  </header>
+
+  <main class="main" id="main" tabindex="-1">
+    <div class="boot-state" id="bootState">
+      <div class="spinner" aria-hidden="true"></div>
+      <p>正在载入…</p>
+    </div>
+    <div id="view" class="view" hidden></div>
+  </main>
+</div>
+
+<div class="scrim" id="scrim" hidden></div>
+
+<div class="banner" id="offlineBanner" role="alert" hidden>
+  <svg viewBox="0 0 24 24" class="ico" aria-hidden="true"><path d="M12 8.5v5.2M12 17.4h.01"/><path d="M10.3 3.9 2.7 17.4a2 2 0 0 0 1.7 3h15.2a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg>
+  <div class="banner-text">
+    <strong>无法连接后端</strong>
+    <span id="offlineDetail">/api/state 请求失败，界面处于离线模式。</span>
+  </div>
+  <button class="btn btn-ghost btn-sm" id="offlineRetry" type="button" data-track="ui.offline.retry">重试</button>
+</div>
+
+<div class="toasts" id="toasts" role="region" aria-label="操作通知" aria-live="polite"></div>
+<div id="modalRoot"></div>
+
+<noscript>
+  <div class="noscript">本应用需要启用 JavaScript 才能运行。</div>
+</noscript>
+
+<script type="module" src="assets/app.js"></script>
+</body>
+</html>

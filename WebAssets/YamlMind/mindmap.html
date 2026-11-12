@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0a0c11">
+<title>思维导图 · YAML Mind</title>
+<script>
+  (function () {
+    try {
+      var t = localStorage.getItem('ym:theme') || 'dark';
+      var s = t === 'auto' ? (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark') : t;
+      document.documentElement.setAttribute('data-theme', s);
+      document.querySelector('meta[name="theme-color"]').setAttribute('content', s === 'dark' ? '#0a0c11' : '#f4f2ed');
+    } catch (e) {}
+  })();
+</script>
+<link rel="stylesheet" href="/static/fonts/fonts.css">
+<link rel="stylesheet" href="/static/css/tokens.css">
+<link rel="stylesheet" href="/static/css/ui.css">
+<link rel="stylesheet" href="/static/css/mindmap.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='6' fill='%23f2a93b'/%3E%3Cg fill='none' stroke='%2312100a' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='12' cy='12' r='2.4'/%3E%3Ccircle cx='5' cy='6.5' r='1.8'/%3E%3Ccircle cx='19' cy='6.5' r='1.8'/%3E%3Ccircle cx='5' cy='17.5' r='1.8'/%3E%3Ccircle cx='19' cy='17.5' r='1.8'/%3E%3Cpath d='M6.6 7.6 9.9 10.5M17.4 7.6 14.1 10.5M6.6 16.4 9.9 13.5M17.4 16.4 14.1 13.5'/%3E%3C/g%3E%3C/svg%3E">
+</head>
+<body class="mm-page">
+
+<!-- floating toolbar ------------------------------------------------------ -->
+<header class="mm-bar">
+  <div class="mm-bar__left">
+    <a class="mm-home" href="/" title="返回导图管理">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="2.5"/><circle cx="4.6" cy="6.2" r="1.9"/><circle cx="19.4" cy="6.2" r="1.9"/>
+        <circle cx="4.6" cy="17.8" r="1.9"/><circle cx="19.4" cy="17.8" r="1.9"/>
+        <path d="M6.4 7.3 9.8 10.4M17.6 7.3 14.2 10.4M6.4 16.7 9.8 13.6M17.6 16.7 14.2 13.6"/>
+      </svg>
+    </a>
+    <div class="mm-doc">
+      <h1 class="mm-title" id="docTitle">载入中…</h1>
+      <div class="mm-sub">
+        <span id="docStats" class="mm-stat">—</span>
+        <span class="mm-dot"></span>
+        <span id="syncState" class="mm-sync"><i class="dot"></i><span>实时同步</span></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="mm-bar__mid">
+    <div class="seg" id="layoutSeg" role="group" aria-label="布局">
+      <button class="seg__btn is-on" data-layout="radial" title="经典放射状：左右两侧均匀分布"><span data-ico="radial"></span>放射</button>
+      <button class="seg__btn" data-layout="tree" title="树形图：向右逐层展开"><span data-ico="tree"></span>树形</button>
+    </div>
+  </div>
+
+  <div class="mm-bar__right">
+    <div class="seg" id="zoomSeg">
+      <button class="seg__btn" data-zoom="out" title="缩小 ( - )"><span data-ico="zoomOut"></span></button>
+      <button class="seg__btn mm-zoomval" id="zoomVal" data-zoom="100" title="恢复 100%">100%</button>
+      <button class="seg__btn" data-zoom="in" title="放大 ( + )"><span data-ico="zoomIn"></span></button>
+      <button class="seg__btn" data-zoom="fit" title="适应画布 ( F )"><span data-ico="fit"></span></button>
+    </div>
+    <button class="btn btn--ghost btn--sm" id="btnExpand" title="展开全部节点"><span data-ico="layers"></span></button>
+    <button class="btn btn--ghost btn--sm" id="btnPng" title="导出 PNG 图片"><span data-ico="down"></span></button>
+    <div class="seg" id="themeSeg" title="主题"></div>
+    <a class="btn btn--primary btn--sm" id="btnEdit" href="#" title="打开 YAML 编辑器"><span data-ico="edit"></span>编辑 YAML</a>
+  </div>
+</header>
+
+<!-- canvas ---------------------------------------------------------------- -->
+<div class="mm-stage" id="stage">
+  <div class="mm-grid"></div>
+  <svg id="map" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <filter id="mshadow" x="-30%" y="-40%" width="160%" height="200%">
+        <feDropShadow dx="0" dy="3" stdDeviation="5" flood-color="#000" flood-opacity="0.28"/>
+      </filter>
+      <linearGradient id="rootfill" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="var(--accent-hi)"/><stop offset="100%" stop-color="var(--accent)"/>
+      </linearGradient>
+    </defs>
+    <g id="world">
+      <g id="links"></g>
+      <g id="nodes"></g>
+    </g>
+  </svg>
+
+  <div class="mm-empty" id="emptyState" hidden></div>
+  <div class="mm-loading" id="loadingState">
+    <div class="eloading__spin"></div><span>正在生成思维导图…</span>
+  </div>
+</div>
+
+<!-- hint ------------------------------------------------------------------ -->
+<div class="mm-hint" id="hint">
+  <span><b>滚轮</b> 缩放</span><span><b>拖拽</b> 平移</span>
+  <span><b>点击节点</b> 折叠 / 展开</span><span><b>F</b> 适应画布</span>
+</div>
+
+<!-- inspector ------------------------------------------------------------- -->
+<div class="mm-inspect" id="inspect" hidden></div>
+
+<script src="/static/js/common.js"></script>
+<script src="/static/js/mindmap.js"></script>
+</body>
+</html>

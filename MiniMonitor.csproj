@@ -1,0 +1,71 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows10.0.19041.0</TargetFramework>
+    <SupportedOSPlatformVersion>10.0.17763.0</SupportedOSPlatformVersion>
+    <UseWindowsForms>true</UseWindowsForms>
+    <!-- 允许在 Linux/macOS 等非 Windows 主机上交叉编译 Windows 目标（Windows 本机编译不受影响） -->
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>app.ico</ApplicationIcon>
+    <AssemblyName>MiniMonitor</AssemblyName>
+    <Product>MiniMonitor</Product>
+    <AssemblyTitle>MiniMonitor</AssemblyTitle>
+    <Version>1.66.4</Version>
+    <FileVersion>1.66.4.0</FileVersion>
+    <NeutralLanguage>zh-CN</NeutralLanguage>
+    <SatelliteResourceLanguages>zh-Hans</SatelliteResourceLanguages>
+    <Deterministic>true</Deterministic>
+    <!-- WebView2 包同时携带 WPF 程序集，WinForms 项目会出现无害的 WindowsBase 版本冲突提示 -->
+    <MSBuildWarningsAsMessages>MSB3277</MSBuildWarningsAsMessages>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="LibreHardwareMonitorLib" Version="0.9.6" />
+    <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.4314.35" />
+    <PackageReference Include="NAudio" Version="2.2.1" />
+    <PackageReference Include="SharpCompress" Version="1.0.0" />
+    <PackageReference Include="System.Management" Version="10.0.2" />
+    <PackageReference Include="System.Diagnostics.PerformanceCounter" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Data.Sqlite" Version="8.0.33" />
+    <PackageReference Include="YamlDotNet" Version="16.3.0" />
+    <PackageReference Include="MailKit" Version="4.18.2" />
+    <PackageReference Include="TagLibSharp" Version="2.3.0" />
+    <PackageReference Include="System.Text.Encoding.CodePages" Version="8.0.0" />
+    <!-- Navicat 复刻版：多数据库驱动 / SSH 隧道 / 密码保护 -->
+    <PackageReference Include="MySqlConnector" Version="2.6.2" />
+    <PackageReference Include="Npgsql" Version="9.0.5" />
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="5.2.2" />
+    <PackageReference Include="Oracle.ManagedDataAccess.Core" Version="23.9.1" />
+    <PackageReference Include="SSH.NET" Version="2024.2.0" />
+    <PackageReference Include="System.IO.Ports" Version="10.0.3" />
+    <PackageReference Include="System.Security.Cryptography.ProtectedData" Version="8.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="app.ico" />
+    <EmbeddedResource Include="WebAssets\YamlMind\**\*">
+      <LogicalName>ym/%(RecursiveDir)%(Filename)%(Extension)</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="WebAssets\WebTodo\**\*">
+      <LogicalName>wt/%(RecursiveDir)%(Filename)%(Extension)</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="WebAssets\Drawio\drawio.pak">
+      <LogicalName>drawio.pak</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\dbip-country-lite-2026-11.csv.gz">
+      <LogicalName>MiniMonitor.Resources.dbip-country.csv.gz</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\oui.txt">
+      <LogicalName>MiniMonitor.Resources.oui.txt</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="XShell\Web\**\*">
+      <LogicalName>xs/%(RecursiveDir)%(Filename)%(Extension)</LogicalName>
+    </EmbeddedResource>
+  </ItemGroup>
+
+</Project>

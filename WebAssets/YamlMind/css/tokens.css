@@ -1,0 +1,237 @@
+/* ==========================================================================
+   YAML Mind — design tokens
+   Signature look: graphite "instrument panel", amber signal accent, teal
+   secondary. Dark is the default surface; light is a warm paper variant.
+   ========================================================================== */
+
+:root {
+  color-scheme: dark;
+
+  /* surfaces ------------------------------------------------------------- */
+  --bg:            #0a0c11;
+  --bg-grain:      rgba(255, 255, 255, 0.014);
+  --surface:       #10141c;
+  --surface-2:     #141a25;
+  --surface-3:     #1a212d;
+  --surface-hi:    #212a39;
+  --line:          #212a38;
+  --line-soft:     #1b2230;
+  --line-strong:   #2e3a4d;
+
+  /* text ------------------------------------------------------------------ */
+  --text:          #e8ecf4;
+  --text-2:        #a7b1c2;
+  --text-3:        #6d798c;
+  --text-inv:      #0a0c11;
+
+  /* brand ----------------------------------------------------------------- */
+  --accent:        #f2a93b;
+  --accent-hi:     #ffc968;
+  --accent-dim:    rgba(242, 169, 59, 0.14);
+  --accent-line:   rgba(242, 169, 59, 0.38);
+  --teal:          #3fbfa8;
+  --teal-dim:      rgba(63, 191, 168, 0.14);
+
+  /* semantic --------------------------------------------------------------- */
+  --ok:            #5bd18c;
+  --ok-dim:        rgba(91, 209, 140, 0.13);
+  --warn:          #f2a93b;
+  --warn-dim:      rgba(242, 169, 59, 0.13);
+  --danger:        #f2685c;
+  --danger-dim:    rgba(242, 104, 92, 0.13);
+  --info:          #6cb2f5;
+  --info-dim:      rgba(108, 178, 245, 0.13);
+
+  /* lock / pin states ------------------------------------------------------ */
+  --lock:          #f2685c;
+
+  /* elevation -------------------------------------------------------------- */
+  --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-2: 0 6px 22px -8px rgba(0, 0, 0, 0.65), 0 2px 6px rgba(0, 0, 0, 0.35);
+  --shadow-3: 0 28px 70px -24px rgba(0, 0, 0, 0.8), 0 6px 18px rgba(0, 0, 0, 0.4);
+  --glow-accent: 0 0 0 1px var(--accent-line), 0 8px 30px -12px rgba(242, 169, 59, 0.45);
+
+  /* geometry --------------------------------------------------------------- */
+  --r-xs: 6px;
+  --r-sm: 9px;
+  --r-md: 13px;
+  --r-lg: 18px;
+  --r-xl: 26px;
+  --r-pill: 999px;
+
+  /* type ------------------------------------------------------------------- */
+  --font-display: "Sora", "PingFang SC", "Noto Sans CJK SC", "Noto Sans SC", "HarmonyOS Sans SC",
+                  "Microsoft YaHei", system-ui, sans-serif;
+  --font-ui: "Manrope", "PingFang SC", "Noto Sans CJK SC", "Noto Sans SC", "HarmonyOS Sans SC",
+             "Microsoft YaHei", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", "SFMono-Regular", "Cascadia Mono", "Noto Sans Mono CJK SC",
+               Consolas, "PingFang SC", monospace;
+
+  --fs-2xs: 10.5px;
+  --fs-xs:  12px;
+  --fs-sm:  13px;
+  --fs-md:  14.5px;
+  --fs-lg:  17px;
+  --fs-xl:  22px;
+  --fs-2xl: 30px;
+  --fs-3xl: 42px;
+
+  --lh-tight: 1.15;
+  --lh-snug:  1.35;
+  --lh-body:  1.62;
+
+  /* spacing ---------------------------------------------------------------- */
+  --sp-1: 4px;  --sp-2: 8px;  --sp-3: 12px; --sp-4: 16px;
+  --sp-5: 22px; --sp-6: 30px; --sp-7: 44px; --sp-8: 68px;
+
+  --header-h: 62px;
+  --max-w: 1320px;
+
+  /* motion ----------------------------------------------------------------- */
+  --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --t-fast: 120ms;
+  --t: 200ms;
+  --t-slow: 420ms;
+
+  /* mind-map branch palette (level-1 hues, clockwise) ---------------------- */
+  --b1: #f2a93b;
+  --b2: #3fbfa8;
+  --b3: #7aa2f7;
+  --b4: #e0709a;
+  --b5: #b79cf0;
+  --b6: #9ad14f;
+  --b7: #f2845c;
+  --b8: #56c7d6;
+}
+
+[data-theme="light"] {
+  color-scheme: light;
+
+  --bg:            #f4f2ed;
+  --bg-grain:      rgba(20, 16, 8, 0.02);
+  --surface:       #fffdf9;
+  --surface-2:     #faf7f1;
+  --surface-3:     #f2eee6;
+  --surface-hi:    #eae5db;
+  --line:          #e2dbcf;
+  --line-soft:     #ebe5da;
+  --line-strong:   #cdc4b5;
+
+  --text:          #1b1a17;
+  --text-2:        #55504a;
+  --text-3:        #8b847a;
+  --text-inv:      #fffdf9;
+
+  --accent:        #c07914;
+  --accent-hi:     #a06408;
+  --accent-dim:    rgba(192, 121, 20, 0.11);
+  --accent-line:   rgba(192, 121, 20, 0.4);
+  --teal:          #17887a;
+  --teal-dim:      rgba(23, 136, 122, 0.1);
+
+  --ok:            #2f8f56;
+  --ok-dim:        rgba(47, 143, 86, 0.1);
+  --warn:          #b5811a;
+  --warn-dim:      rgba(181, 129, 26, 0.12);
+  --danger:        #c9483c;
+  --danger-dim:    rgba(201, 72, 60, 0.1);
+  --info:          #2f6fbb;
+  --info-dim:      rgba(47, 111, 187, 0.1);
+
+  --lock:          #c9483c;
+
+  --shadow-1: 0 1px 2px rgba(60, 45, 20, 0.08);
+  --shadow-2: 0 8px 24px -10px rgba(60, 45, 20, 0.22), 0 2px 6px rgba(60, 45, 20, 0.07);
+  --shadow-3: 0 30px 70px -28px rgba(60, 45, 20, 0.3), 0 6px 18px rgba(60, 45, 20, 0.1);
+
+  --b1: #c07914;
+  --b2: #17887a;
+  --b3: #3a63c4;
+  --b4: #b83f71;
+  --b5: #7a4fc0;
+  --b6: #5c8a1c;
+  --b7: #c4552b;
+  --b8: #1c8494;
+}
+
+/* --------------------------------------------------------------------------
+   reset
+   -------------------------------------------------------------------------- */
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body { height: 100%; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-ui);
+  font-size: var(--fs-md);
+  line-height: var(--lh-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  overflow-x: hidden;
+}
+
+h1, h2, h3, h4, h5 { margin: 0; font-family: var(--font-display); font-weight: 700; line-height: var(--lh-tight); letter-spacing: -0.015em; }
+p { margin: 0; }
+a { color: inherit; text-decoration: none; }
+button, input, select, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+ul, ol { margin: 0; padding: 0; list-style: none; }
+code, pre, kbd { font-family: var(--font-mono); }
+
+::selection { background: var(--accent); color: var(--text-inv); }
+
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+
+/* scrollbars --------------------------------------------------------------- */
+* { scrollbar-width: thin; scrollbar-color: var(--line-strong) transparent; }
+*::-webkit-scrollbar { width: 11px; height: 11px; }
+*::-webkit-scrollbar-track { background: transparent; }
+*::-webkit-scrollbar-thumb {
+  background: var(--line-strong);
+  border: 3px solid transparent;
+  background-clip: content-box;
+  border-radius: var(--r-pill);
+}
+*::-webkit-scrollbar-thumb:hover { background: var(--text-3); background-clip: content-box; }
+
+/* --------------------------------------------------------------------------
+   ambient background: dotted grid + soft light pools (signature texture)
+   -------------------------------------------------------------------------- */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background-image: radial-gradient(var(--bg-grain) 1px, transparent 1px);
+  background-size: 22px 22px;
+  opacity: 0.85;
+}
+
+body::after {
+  content: "";
+  position: fixed;
+  inset: -20% -10% auto -10%;
+  height: 70vh;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    radial-gradient(58% 62% at 18% 8%, var(--accent-dim) 0%, transparent 62%),
+    radial-gradient(50% 60% at 88% 4%, var(--teal-dim) 0%, transparent 60%);
+  filter: blur(6px);
+  opacity: 0.9;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

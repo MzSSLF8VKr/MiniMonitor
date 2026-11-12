@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0a0c11">
+<title>导图管理 · YAML Mind</title>
+<script>
+  (function () {
+    try {
+      var t = localStorage.getItem('ym:theme') || 'dark';
+      var s = t === 'auto' ? (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark') : t;
+      document.documentElement.setAttribute('data-theme', s);
+      document.querySelector('meta[name="theme-color"]').setAttribute('content', s === 'dark' ? '#0a0c11' : '#f4f2ed');
+    } catch (e) {}
+  })();
+</script>
+<link rel="stylesheet" href="/static/fonts/fonts.css">
+<link rel="stylesheet" href="/static/css/tokens.css">
+<link rel="stylesheet" href="/static/css/ui.css">
+<link rel="stylesheet" href="/static/css/index.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='6' fill='%23f2a93b'/%3E%3Cg fill='none' stroke='%2312100a' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='12' cy='12' r='2.4'/%3E%3Ccircle cx='5' cy='6.5' r='1.8'/%3E%3Ccircle cx='19' cy='6.5' r='1.8'/%3E%3Ccircle cx='5' cy='17.5' r='1.8'/%3E%3Ccircle cx='19' cy='17.5' r='1.8'/%3E%3Cpath d='M6.6 7.6 9.9 10.5M17.4 7.6 14.1 10.5M6.6 16.4 9.9 13.5M17.4 16.4 14.1 13.5'/%3E%3C/g%3E%3C/svg%3E">
+</head>
+<body>
+<div id="top"></div>
+
+<main class="main">
+  <div class="wrap">
+
+    <!-- page head ------------------------------------------------------- -->
+    <section class="head">
+      <div class="head__intro">
+        <div class="eyebrow">DOCUMENT MANAGER</div>
+        <h1 class="head__title">思维导图<span class="head__accent">.</span></h1>
+        <p class="head__text">
+          以 YAML 文本为唯一真源：新建、修改、删除导图。所有数据存放在服务端
+          <code>data/</code> 目录，随时可在新标签页打开编辑器与思维导图。
+        </p>
+        <div class="head__cta">
+          <button class="btn btn--primary btn--lg" id="btnNew">
+            <span id="icNew"></span><span>新建导图</span><kbd>N</kbd>
+          </button>
+          <a class="btn btn--ghost btn--lg" href="/settings" id="btnSettings"><span id="icGear"></span>设置</a>
+        </div>
+      </div>
+
+      <div class="readout" id="readout" aria-label="运行状态">
+        <div class="readout__grid">
+          <div class="ro"><div class="ro__label">文档</div><div class="ro__value" id="roDocs">—</div></div>
+          <div class="ro"><div class="ro__label">节点总数</div><div class="ro__value" id="roNodes">—</div></div>
+          <div class="ro"><div class="ro__label">库体积</div><div class="ro__value" id="roSize">—</div></div>
+          <div class="ro"><div class="ro__label">历史快照</div><div class="ro__value" id="roVers">—</div></div>
+        </div>
+        <div class="readout__foot">
+          <span class="row gap-3" id="roLock"></span>
+          <span class="row gap-3" id="roSchedule"></span>
+        </div>
+      </div>
+    </section>
+
+    <!-- toolbar --------------------------------------------------------- -->
+    <section class="toolbar card">
+      <div class="search is-empty" id="searchBox">
+        <span id="searchIcon"></span>
+        <input class="input" id="search" type="search" placeholder="搜索标题或大纲内容…  ( / )" autocomplete="off" spellcheck="false">
+        <button class="search__clear" id="searchClear" type="button" aria-label="清除"></button>
+      </div>
+
+      <div class="toolbar__right">
+        <label class="row" for="sort">
+          <span class="label" style="font-size:11px">排序</span>
+        </label>
+        <select class="select" id="sort" style="width:auto;min-width:132px">
+          <option value="updated">最近更新</option>
+          <option value="created">创建时间</option>
+          <option value="title">标题 A–Z</option>
+          <option value="nodes">节点数量</option>
+          <option value="size">文档体积</option>
+        </select>
+        <div class="seg" id="viewSeg" role="group" aria-label="视图">
+          <button class="seg__btn is-on" data-view="grid" title="卡片视图"><span id="vi1"></span>卡片</button>
+          <button class="seg__btn" data-view="list" title="列表视图"><span id="vi2"></span>列表</button>
+        </div>
+        <button class="btn btn--ghost btn--sm" id="btnRefresh" title="刷新列表"><span id="icRefresh"></span>刷新</button>
+      </div>
+    </section>
+
+    <!-- documents ------------------------------------------------------- -->
+    <section class="docs" id="docs"></section>
+    <div class="pager" id="pager"></div>
+  </div>
+</main>
+
+<!-- create dialog template -->
+<template id="tplCreate">
+  <div class="col gap-4">
+    <div class="field">
+      <label class="label" for="newTitle">导图名称</label>
+      <input class="input" id="newTitle" maxlength="120" placeholder="例如：2026 产品规划" autocomplete="off">
+      <div class="tiny muted">名称同时作为思维导图的根节点标题。</div>
+    </div>
+    <div class="field">
+      <label class="label">起始内容</label>
+      <div class="tpl-grid" id="tplGrid"></div>
+    </div>
+    <div class="field">
+      <label class="label">或导入 YAML 文件</label>
+      <div class="dropzone" id="dropZone">
+        <span class="dropzone__ico" id="dzIco"></span>
+        <span class="dropzone__body">
+          <span class="dropzone__t">选择或拖入 .yaml / .yml 文件</span>
+          <span class="dropzone__h" id="dzHint">以文件内容创建新导图，文件名自动作为名称</span>
+        </span>
+        <button type="button" class="btn btn--sm btn--ghost" id="dzBtn">选择文件</button>
+      </div>
+      <input type="file" id="fileYaml" accept=".yaml,.yml,.txt,text/yaml,application/x-yaml" hidden>
+    </div>
+  </div>
+</template>
+
+<script src="/static/js/common.js"></script>
+<script src="/static/js/index.js"></script>
+</body>
+</html>

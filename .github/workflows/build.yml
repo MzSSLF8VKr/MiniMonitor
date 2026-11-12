@@ -1,0 +1,37 @@
+name: Build
+
+# 每次推送 main / 提交 PR 时自动编译验证，保证源码始终可构建
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 8 SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: Publish self-contained single-file exe
+        run: >
+          dotnet publish MiniMonitor.csproj -c Release -r win-x64 --self-contained true
+          -p:PublishSingleFile=true
+          -p:IncludeNativeLibrariesForSelfExtract=true
+          -p:EnableCompressionInSingleFile=true
+          -p:DebugType=None -p:DebugSymbols=false
+          --verbosity minimal
+
+      - name: Verify build output
+        shell: pwsh
+        run: |
+          $exe = "bin/Release/net8.0-windows10.0.19041.0/win-x64/publish/MiniMonitor.exe"
+          if (-not (Test-Path $exe)) { throw "未找到编译产物 MiniMonitor.exe" }
+          $size = [math]::Round((Get-Item $exe).Length / 1MB, 1)
+          Write-Host "Build OK: MiniMonitor.exe ($size MB)"

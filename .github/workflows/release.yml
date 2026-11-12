@@ -1,0 +1,133 @@
+name: Release
+
+# 推送 v* 标签自动构建并发布；也可在 Actions 页面手动触发
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "版本号（不含 v 前缀，例如 1.66.4）"
+        required: true
+        default: "1.66.4"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 8 SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: Resolve version
+        id: ver
+        shell: pwsh
+        run: |
+          if ("${{ github.ref_type }}" -eq "tag") {
+            $v = "${{ github.ref_name }}" -replace '^v', ''
+          } else {
+            $v = "${{ inputs.version }}"
+          }
+          if (-not $v) { throw "无法解析版本号" }
+          "version=$v" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
+          Write-Host "Building version: $v"
+
+      - name: Publish self-contained single-file exe
+        run: >
+          dotnet publish MiniMonitor.csproj -c Release -r win-x64 --self-contained true
+          -p:PublishSingleFile=true
+          -p:IncludeNativeLibrariesForSelfExtract=true
+          -p:EnableCompressionInSingleFile=true
+          -p:DebugType=None -p:DebugSymbols=false
+          --verbosity minimal
+
+      - name: Package source zip and compute SHA256
+        shell: pwsh
+        run: |
+          $v = "${{ steps.ver.outputs.version }}"
+          $pub = "bin/Release/net8.0-windows10.0.19041.0/win-x64/publish"
+          if (-not (Test-Path "$pub/MiniMonitor.exe")) { throw "未找到编译产物 MiniMonitor.exe" }
+          New-Item -ItemType Directory -Force -Path dist | Out-Null
+          Copy-Item "$pub/MiniMonitor.exe" "dist/MiniMonitor-v$v-win-x64.exe"
+          # 源码包：与当前提交完全一致的仓库内容（不含 .git / 构建产物）
+          git archive --format=zip --output="dist/MiniMonitor-v$v-source.zip" HEAD
+          if ($LASTEXITCODE -ne 0) { throw "git archive 打包源码失败" }
+          # 计算 SHA256：汇总文件 + 每个资产单独的 .sha256
+          $sums = @()
+          foreach ($f in Get-ChildItem dist -File | Sort-Object Name) {
+            $h = (Get-FileHash $f.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
+            $line = "$h  $($f.Name)"
+            $sums += $line
+            Set-Content -Path "dist/$($f.Name).sha256" -Value $line -Encoding ascii
+          }
+          Set-Content -Path dist/SHA256SUMS.txt -Value $sums -Encoding ascii
+          Write-Host "===== SHA256SUMS ====="
+          Get-Content dist/SHA256SUMS.txt
+
+      - name: Write release notes
+        shell: pwsh
+        run: |
+          $v = "${{ steps.ver.outputs.version }}"
+          $sums = (Get-Content dist/SHA256SUMS.txt) -join "`n"
+          $notes = @"
+          ## MiniMonitor v$v
+
+          Windows 置顶悬浮窗监控 + 一体化桌面工具箱。自包含单文件 exe，无需安装 .NET 运行时。
+
+          ### 资产说明
+
+          | 文件 | 说明 |
+          |---|---|
+          | ``MiniMonitor-v$v-win-x64.exe`` | 主程序（自包含单文件，Win10/11 x64） |
+          | ``MiniMonitor-v$v-source.zip`` | 完整源码包（与本 tag 仓库内容一致） |
+          | ``SHA256SUMS.txt`` | exe 与源码包的 SHA256 校验值 |
+          | ``*.sha256`` | 单文件校验值 |
+
+          ### SHA256
+
+          ``````
+          $sums
+          ``````
+
+          校验方法（PowerShell）：``Get-FileHash .\MiniMonitor-v$v-win-x64.exe -Algorithm SHA256``，与上表比对。
+
+          ### 运行提示
+
+          - 建议右键"以管理员身份运行"（温度读取需要）；拒绝 UAC 时温度自动走 WMI 后备通道。
+          - 终端 / RSS 界面依赖 Edge WebView2 Runtime（Win10/11 自带）；视频功能可选配 ffmpeg.exe。
+          - 本 Release 由 GitHub Actions 自动构建生成。
+          "@
+          Set-Content -Path dist/notes.md -Value $notes -Encoding utf8
+
+      - name: Create or update GitHub Release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $v = "${{ steps.ver.outputs.version }}"
+          $tag = "v$v"
+          $assets = Get-ChildItem dist -File |
+            Where-Object { $_.Name -ne "notes.md" } |
+            ForEach-Object { $_.FullName }
+          gh release view $tag 2>$null | Out-Null
+          if ($LASTEXITCODE -eq 0) {
+            Write-Host "Release $tag 已存在，覆盖上传资产"
+            gh release upload $tag $assets --clobber
+          } else {
+            gh release create $tag $assets `
+              --title "MiniMonitor v$v" `
+              --notes-file dist/notes.md `
+              --target "$env:GITHUB_SHA"
+          }
+          if ($LASTEXITCODE -ne 0) { throw "Release 发布失败" }

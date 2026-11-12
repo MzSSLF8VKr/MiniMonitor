@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0a0c11">
+<title>设置 · YAML Mind</title>
+<script>
+  (function () {
+    try {
+      var t = localStorage.getItem('ym:theme') || 'dark';
+      var s = t === 'auto' ? (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark') : t;
+      document.documentElement.setAttribute('data-theme', s);
+      document.querySelector('meta[name="theme-color"]').setAttribute('content', s === 'dark' ? '#0a0c11' : '#f4f2ed');
+    } catch (e) {}
+  })();
+</script>
+<link rel="stylesheet" href="/static/fonts/fonts.css">
+<link rel="stylesheet" href="/static/css/tokens.css">
+<link rel="stylesheet" href="/static/css/ui.css">
+<link rel="stylesheet" href="/static/css/settings.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='6' fill='%23f2a93b'/%3E%3Cg fill='none' stroke='%2312100a' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='12' cy='12' r='2.4'/%3E%3Ccircle cx='5' cy='6.5' r='1.8'/%3E%3Ccircle cx='19' cy='6.5' r='1.8'/%3E%3Ccircle cx='5' cy='17.5' r='1.8'/%3E%3Ccircle cx='19' cy='17.5' r='1.8'/%3E%3Cpath d='M6.6 7.6 9.9 10.5M17.4 7.6 14.1 10.5M6.6 16.4 9.9 13.5M17.4 16.4 14.1 13.5'/%3E%3C/g%3E%3C/svg%3E">
+</head>
+<body>
+<div id="top"></div>
+
+<main class="main">
+  <div class="wrap set-wrap">
+
+    <section class="set-head">
+      <div class="eyebrow">PREFERENCES</div>
+      <h1 class="set-h1">设置<span class="dotaccent">.</span></h1>
+      <p class="set-lead">
+        锁定模式默认开启，只允许<b>新增</b>与<b>修改</b>；手动关闭后，系统每天
+        <b class="mono">00:10</b> 自动重新上锁。数据库每天 <b class="mono">01:30</b> 自动优化，
+        保证随时打开思维导图都是秒开。
+      </p>
+      <nav class="set-nav" id="setNav">
+        <a href="#sec-lock" class="is-on">安全</a>
+        <a href="#sec-theme">外观</a>
+        <a href="#sec-editor">编辑器</a>
+        <a href="#sec-data">数据与备份</a>
+        <a href="#sec-maint">维护任务</a>
+      </nav>
+    </section>
+
+    <div class="set-grid">
+
+      <!-- ── lock mode ─────────────────────────────────────────────── -->
+      <section class="card set-card" id="sec-lock">
+        <header class="set-card__head">
+          <span class="set-card__ico" id="icoLock"></span>
+          <div><h2>锁定模式</h2><p class="set-card__sub">防止误删导图与误覆盖数据</p></div>
+          <span class="right" id="lockChip"></span>
+        </header>
+        <div class="set-card__body">
+          <div class="row row--bet locktoggle">
+            <div>
+              <div class="set-label" id="lockTitle">锁定中</div>
+              <div class="set-desc" id="lockDesc">删除与导入功能已被禁用，只能新增与修改。</div>
+            </div>
+            <button class="switch" id="lockSwitch" role="switch" aria-checked="true" aria-label="锁定模式">
+              <span class="switch__knob"></span>
+            </button>
+          </div>
+          <div class="lockfacts" id="lockFacts"></div>
+          <div class="set-actions">
+            <button class="btn btn--sm btn--ghost" id="btnRelockNow"><span data-ico="lock"></span>立即上锁</button>
+          </div>
+          <p class="set-note" id="relockNote"></p>
+        </div>
+      </section>
+
+      <!-- ── theme ─────────────────────────────────────────────────── -->
+      <section class="card set-card" id="sec-theme">
+        <header class="set-card__head">
+          <span class="set-card__ico" id="icoTheme"></span>
+          <div><h2>外观主题</h2><p class="set-card__sub">整站范围生效，默认深色</p></div>
+        </header>
+        <div class="set-card__body">
+          <div class="themes" id="themes">
+            <button class="theme-card" data-theme-set="dark">
+              <span class="theme-prev theme-prev--dark"><i></i><i></i><i></i></span>
+              <span class="theme-name">深色</span><span class="theme-tag">默认</span>
+            </button>
+            <button class="theme-card" data-theme-set="light">
+              <span class="theme-prev theme-prev--light"><i></i><i></i><i></i></span>
+              <span class="theme-name">浅色</span><span class="theme-tag">纸张</span>
+            </button>
+            <button class="theme-card" data-theme-set="auto">
+              <span class="theme-prev theme-prev--auto"><i></i><i></i><i></i></span>
+              <span class="theme-name">跟随系统</span><span class="theme-tag">自动</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── editor prefs ──────────────────────────────────────────── -->
+      <section class="card set-card" id="sec-editor">
+        <header class="set-card__head">
+          <span class="set-card__ico" id="icoEdit"></span>
+          <div><h2>编辑器</h2><p class="set-card__sub">YAML 编辑器与新标签页的默认行为</p></div>
+        </header>
+        <div class="set-card__body">
+          <div class="setrow">
+            <div class="setrow__t">
+              <div class="set-label">输入自动保存</div>
+              <div class="set-desc">停止输入 0.9 秒后写入数据库；<kbd>Ctrl</kbd><kbd>S</kbd> 与「保存」按钮始终可用。</div>
+            </div>
+            <button class="switch" id="autoSaveSwitch" role="switch" aria-checked="true"><span class="switch__knob"></span></button>
+          </div>
+          <div class="setrow">
+            <div class="setrow__t">
+              <div class="set-label">对齐虚线</div>
+              <div class="set-desc">按缩进层级绘制点状参考线（类 Notepad++），方便核对 YAML 层级。</div>
+            </div>
+            <button class="switch" id="guideSwitch" role="switch" aria-checked="true"><span class="switch__knob"></span></button>
+          </div>
+          <div class="setrow">
+            <div class="setrow__t">
+              <div class="set-label">编辑器字号</div>
+              <div class="set-desc">也可在编辑器状态栏用 <kbd>A−</kbd><kbd>A+</kbd> 或 <kbd>Ctrl</kbd><kbd>+</kbd> 调整。</div>
+            </div>
+            <div class="row" style="gap:10px">
+              <input type="range" id="fontRange" class="range" min="11" max="20" step="1" value="14">
+              <b class="mono setval" id="fontVal">14px</b>
+            </div>
+          </div>
+          <div class="setrow setrow--last">
+            <div class="setrow__t">
+              <div class="set-label">思维导图默认布局</div>
+              <div class="set-desc">放射状：左右两侧均匀分布；树形图：向右逐层展开。</div>
+            </div>
+            <div class="seg" id="layoutSeg">
+              <button class="seg__btn is-on" data-layout="radial"><span data-ico="radial"></span>放射</button>
+              <button class="seg__btn" data-layout="tree"><span data-ico="tree"></span>树形</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── data & backup ─────────────────────────────────────────── -->
+      <section class="card set-card set-card--wide" id="sec-data">
+        <header class="set-card__head">
+          <span class="set-card__ico" id="icoDb"></span>
+          <div><h2>数据与备份</h2><p class="set-card__sub">SQLite 单文件，全部数据位于服务端 data/ 目录</p></div>
+          <span class="right row" style="gap:6px">
+            <span class="chip" id="chipMode"></span>
+            <button class="btn btn--sm btn--ghost" id="btnRefreshStats"><span data-ico="refresh"></span>刷新</button>
+          </span>
+        </header>
+        <div class="set-card__body">
+          <div class="stats" id="stats"></div>
+
+          <div class="backup">
+            <div class="backup__col">
+              <h3 class="backup__t">导出 JSON 备份</h3>
+              <p class="set-desc">包含全部文档、正文、统计与设置，可直接归档或迁移。</p>
+              <label class="checkrow" for="withVersions">
+                <input type="checkbox" id="withVersions">
+                <span class="checkrow__box"></span>
+                <span>同时包含历史快照（文件更大，可完整回滚）</span>
+              </label>
+              <div class="set-actions">
+                <button class="btn btn--primary btn--sm" id="btnExport"><span data-ico="down"></span>导出 JSON</button>
+                <button class="btn btn--ghost btn--sm" id="btnExportCopy"><span data-ico="copy"></span>复制到剪贴板</button>
+              </div>
+            </div>
+
+            <div class="backup__col">
+              <h3 class="backup__t">导入 JSON 还原</h3>
+              <p class="set-desc">按 ID 合并：较新的版本覆盖，较旧或相同的跳过，不会清空现有数据。</p>
+              <div id="importGate" class="gate"></div>
+              <div class="set-actions">
+                <button class="btn btn--sm" id="btnImport"><span data-ico="up"></span>选择文件并导入</button>
+                <input type="file" id="fileImport" accept="application/json,.json" hidden>
+              </div>
+            </div>
+          </div>
+
+          <div class="autoback">
+            <div class="row row--bet gap-3">
+              <h3 class="backup__t" style="margin:0">自动安全备份
+                <span class="tiny muted mono" id="autobackDir">data/backups/</span>
+              </h3>
+              <span class="chip" id="autobackCount">0 份</span>
+            </div>
+            <p class="set-desc">每天 01:30 的优化任务结束后自动落一份整库 JSON（不含历史快照），
+              滚动保留最近 <b class="mono">10</b> 份。即使误关锁定模式删错数据，磁盘上仍有昨天的备份可还原。</p>
+            <div class="autoback__list" id="autobackList"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── maintenance ───────────────────────────────────────────── -->
+      <section class="card set-card set-card--wide" id="sec-maint">
+        <header class="set-card__head">
+          <span class="set-card__ico" id="icoMaint"></span>
+          <div><h2>自动维护</h2><p class="set-card__sub">后台常驻线程，无需任何外部定时器</p></div>
+        </header>
+        <div class="set-card__body">
+          <div class="jobs" id="jobs"></div>
+          <div class="set-actions">
+            <button class="btn btn--sm btn--ghost" id="btnOptimize"><span data-ico="bolt"></span>立即优化数据库</button>
+            <button class="btn btn--sm btn--ghost" id="btnVacuum"><span data-ico="db"></span>深度压缩 (VACUUM)</button>
+          </div>
+          <p class="set-note">
+            优化任务：WAL 检查点 → 增量回收空闲页 → 轮换历史快照 → 重建全文索引 → 补齐思维导图缓存 → ANALYZE。
+            单文档最多保留 <b class="mono">50</b> 份历史快照，写入间隔小于 <b class="mono">2 分钟</b> 的自动保存不产生快照。
+          </p>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</main>
+
+<script src="/static/js/common.js"></script>
+<script src="/static/js/settings.js"></script>
+</body>
+</html>

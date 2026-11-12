@@ -1,0 +1,192 @@
+/* ==========================================================================
+   CodeMirror theme + dotted indent guides for the YAML editor
+   All chrome colours come from tokens.css so light/dark both work.
+   ========================================================================== */
+
+.ecode { position: relative; flex: 1 1 auto; min-height: 0; background: var(--bg); }
+
+/* -------------------------------------------------------------- dimensions */
+.CodeMirror {
+  height: 100%;
+  width: 100%;
+  font-family: var(--font-mono);
+  font-size: var(--ed-fs, 14px);
+  line-height: var(--ed-lh, 1.62);
+  background: transparent;
+  color: var(--text);
+  --pad-x: 8px;
+}
+.CodeMirror-lines { padding: 16px 0 45vh; }
+.CodeMirror pre.CodeMirror-line,
+.CodeMirror pre.CodeMirror-line-like {
+  padding: 0 var(--pad-x);
+  line-height: var(--ed-lh, 1.62);
+}
+.CodeMirror-gutters {
+  background: transparent;
+  border-right: 1px solid var(--line-soft);
+  padding-right: 2px;
+}
+.CodeMirror-linenumber {
+  color: var(--text-3);
+  opacity: .62;
+  font-size: calc(var(--ed-fs, 14px) - 2.2px);
+  padding: 0 8px 0 4px;
+  min-width: 34px;
+  font-variant-numeric: tabular-nums;
+}
+.CodeMirror-activeline .CodeMirror-linenumber,
+.cm-s-default .CodeMirror-activeline-background + .CodeMirror-line .CodeMirror-linenumber { opacity: 1; }
+.CodeMirror-activeline-background {
+  background: color-mix(in srgb, var(--accent) 7%, transparent);
+  margin: 0;
+}
+.CodeMirror-activeline .CodeMirror-linenumber { color: var(--accent); opacity: 1; }
+
+.CodeMirror-cursor { border-left: 2px solid var(--accent); border-right: 0; width: 0; }
+.CodeMirror-focused .CodeMirror-selected,
+.CodeMirror-selected { background: color-mix(in srgb, var(--accent) 22%, transparent); }
+.CodeMirror-line::selection, .CodeMirror-line > span::selection,
+.CodeMirror-line > span > span::selection { background: color-mix(in srgb, var(--accent) 30%, transparent); }
+.CodeMirror-line::-moz-selection, .CodeMirror-line > span::-moz-selection,
+.CodeMirror-line > span > span::-moz-selection { background: color-mix(in srgb, var(--accent) 30%, transparent); }
+
+.cm-searching { background: color-mix(in srgb, var(--accent) 34%, transparent); outline: 1px solid var(--accent-line); border-radius: 2px; }
+.CodeMirror-focused .cm-matchhighlight { background: color-mix(in srgb, var(--teal) 20%, transparent); border-radius: 2px; }
+.cm-tab { background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='8' height='8'><path d='M0 0v8' stroke='%23f2685c' stroke-opacity='.5'/></svg>") left center no-repeat; }
+
+/* folding ------------------------------------------------------------------ */
+.CodeMirror-foldmarker {
+  color: var(--accent); text-shadow: none; font-family: var(--font-mono);
+  cursor: pointer; padding: 0 3px; font-size: .92em;
+}
+.CodeMirror-foldgutter { width: 1.3em; }
+.CodeMirror-foldgutter-open, .CodeMirror-foldgutter-folded {
+  cursor: pointer; color: var(--text-3); opacity: .5; transition: opacity var(--t-fast) var(--ease);
+  line-height: 1; font-size: 11px;
+}
+.CodeMirror-foldgutter-open::after { content: "▾"; }
+.CodeMirror-foldgutter-folded::after { content: "▸"; color: var(--accent); opacity: 1; }
+.CodeMirror-foldgutter-open:hover, .CodeMirror-foldgutter-folded:hover { opacity: 1; color: var(--accent); }
+.CodeMirror-foldmarker::after { content: " ⋯ "; }
+
+/* ---------------------------------------------------------------- tokens */
+.cm-s-default .cm-atom      { color: var(--ed-key); font-weight: 600; }   /* mapping keys */
+.cm-s-default .cm-meta      { color: var(--ed-punct); }                   /* -, :, {}[] | > */
+.cm-s-default .cm-string    { color: var(--ed-string); }
+.cm-s-default .cm-string-2  { color: var(--ed-string); }
+.cm-s-default .cm-number    { color: var(--ed-number); }
+.cm-s-default .cm-keyword   { color: var(--ed-bool); font-weight: 600; }
+.cm-s-default .cm-comment   { color: var(--ed-comment); font-style: italic; }
+.cm-s-default .cm-variable-2{ color: var(--ed-anchor); }
+.cm-s-default .cm-def       { color: var(--accent); font-weight: 700; letter-spacing: .04em; }
+.cm-s-default .cm-error     { color: var(--danger); text-decoration: underline wavy var(--danger) 1px; text-underline-offset: 3px; }
+.cm-s-default .cm-tag       { color: var(--ed-anchor); }
+.cm-s-default .cm-quote     { color: var(--ed-string); }
+
+:root {
+  --ed-key:     #ffc968;
+  --ed-punct:   #8593a8;
+  --ed-string:  #6fd8bd;
+  --ed-number:  #c3a8ff;
+  --ed-bool:    #7fb6f7;
+  --ed-comment: #5e6a7d;
+  --ed-anchor:  #f08bb0;
+  --ed-guide:   rgba(140, 158, 186, 0.28);   /* indent guides, inside the whitespace */
+  --ed-grid:    rgba(140, 158, 186, 0.085);  /* the faded dot grid behind the text    */
+}
+[data-theme="light"] {
+  --ed-key:     #9a6410;
+  --ed-punct:   #9c938a;
+  --ed-string:  #14756b;
+  --ed-number:  #6a45b8;
+  --ed-bool:    #2f6fbb;
+  --ed-comment: #9b938a;
+  --ed-anchor:  #b83f71;
+  --ed-guide:   rgba(90, 74, 44, 0.26);
+  --ed-grid:    rgba(90, 74, 44, 0.075);
+}
+
+/* ==========================================================================
+   Dotted indent guides (对齐虚线)
+   Painted on a canvas layer that sits *under* the CodeMirror text, so the
+   guides never interfere with text, selection or hit-testing. The canvas is
+   redrawn on scroll / change / resize and follows the character grid, giving
+   the same look as Notepad++'s indentation guides.
+   ========================================================================== */
+.guide-layer {
+  position: absolute; inset: 0; z-index: 1;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity var(--t-slow) var(--ease);
+}
+.guide-layer.is-on { opacity: 1; }
+/* both layers (faded dot grid + indent guides) live on this one canvas */
+.ecode > .CodeMirror { position: relative; z-index: 2; }
+
+/* error line -------------------------------------------------------------- */
+.CodeMirror-line.cm-line-error {
+  background-color: color-mix(in srgb, var(--danger) 12%, transparent) !important;
+  box-shadow: inset 2px 0 0 var(--danger);
+}
+.cm-errorgutter {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--danger); display: inline-block; margin: 6px 3px 0 0;
+  box-shadow: 0 0 8px color-mix(in srgb, var(--danger) 60%, transparent);
+}
+
+/* error banner ------------------------------------------------------------ */
+.lineerr {
+  display: flex; align-items: flex-start; gap: 12px;
+  margin: 0; padding: 11px 14px;
+  border-bottom: 1px solid color-mix(in srgb, var(--danger) 34%, var(--line));
+  background: linear-gradient(180deg, var(--danger-dim), color-mix(in srgb, var(--danger) 5%, var(--surface)));
+  color: var(--text);
+  font-size: var(--fs-sm);
+  animation: banner-in 260ms var(--ease-out) both;
+}
+.lineerr__ico { color: var(--danger); flex: none; margin-top: 1px; }
+.lineerr__ico svg { width: 17px; height: 17px; display: block; }
+.lineerr__body { flex: 1 1 auto; min-width: 0; }
+.lineerr__title { font-weight: 700; color: var(--danger); font-size: var(--fs-sm); }
+.lineerr__msg { font-family: var(--font-mono); font-size: 12px; color: var(--text); margin-top: 2px; word-break: break-word; }
+.lineerr__pos { font-family: var(--font-mono); font-size: 11px; color: var(--text-3); margin-top: 3px; }
+
+@keyframes banner-in { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
+
+/* loading ------------------------------------------------------------------ */
+.eloading {
+  position: absolute; inset: 0; z-index: 5;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px;
+  background: color-mix(in srgb, var(--bg) 72%, transparent);
+  backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+  color: var(--text-2); font-size: var(--fs-sm);
+  transition: opacity var(--t-slow) var(--ease);
+}
+.eloading.is-out { opacity: 0; pointer-events: none; }
+.eloading__spin {
+  width: 26px; height: 26px; border-radius: 50%;
+  border: 2px solid var(--line-strong); border-top-color: var(--accent);
+  animation: spin 780ms linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg) } }
+
+/* dialog (Ctrl+F) ---------------------------------------------------------- */
+.CodeMirror-dialog {
+  background: var(--surface-3); color: var(--text);
+  border-bottom: 1px solid var(--line-strong);
+  padding: 8px 12px; font-size: var(--fs-xs);
+  font-family: var(--font-mono);
+  box-shadow: var(--shadow-2);
+}
+.CodeMirror-dialog input {
+  background: var(--surface); border: 1px solid var(--line-strong); color: var(--text);
+  border-radius: var(--r-xs); padding: 4px 8px; font-family: var(--font-mono); font-size: 12px;
+  outline: none;
+}
+.CodeMirror-dialog input:focus { border-color: var(--accent-line); box-shadow: 0 0 0 2px var(--accent-dim); }
+.CodeMirror-dialog button {
+  background: var(--surface-2); border: 1px solid var(--line); color: var(--text-2);
+  border-radius: var(--r-xs); padding: 3px 9px; font-size: 11px; margin-left: 4px;
+}
+.CodeMirror-dialog button:hover { border-color: var(--accent-line); color: var(--text); }
